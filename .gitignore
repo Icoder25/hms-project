@@ -27,4 +27,3 @@ CMakeUserPresets.json
 
 # Project-specific
 _deps/
-data/*.txt  # Optional: Ignore all data files to keep them local

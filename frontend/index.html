@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hospital Operations Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="title-wrap">
+                <p class="eyebrow">Connected to C++ Backend and Data Files</p>
+                <h1>Hospital Operations Dashboard</h1>
+                <p class="subtitle">A clean control panel for patients, doctors, appointments, and emergency triage.</p>
+            </div>
+            <div class="topbar-actions">
+                <span id="connectionBadge" class="status-badge status-offline">API Offline</span>
+                <button id="refreshBtn" class="btn ghost">Refresh</button>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <h2>Patients</h2>
+                <p id="statPatients">0</p>
+            </article>
+            <article class="stat-card">
+                <h2>Doctors</h2>
+                <p id="statDoctors">0</p>
+            </article>
+            <article class="stat-card">
+                <h2>Appointments</h2>
+                <p id="statAppointments">0</p>
+            </article>
+            <article class="stat-card">
+                <h2>Pending Emergencies</h2>
+                <p id="statEmergency">0</p>
+            </article>
+        </section>
+
+        <main class="layout">
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Add Patient</h3>
+                </div>
+                <form id="patientForm" class="form-grid">
+                    <label class="field"><span>Patient ID</span><input id="pId" placeholder="P1001" required /></label>
+                    <label class="field"><span>Full Name</span><input id="pName" placeholder="John Carter" required /></label>
+                    <label class="field"><span>Age</span><input id="pAge" type="number" min="1" max="120" placeholder="32" required /></label>
+                    <label class="field"><span>Severity</span><input id="pSeverity" type="number" min="1" max="10" placeholder="7" required /></label>
+                    <label class="field span-2"><span>Symptoms</span><input id="pSymptoms" placeholder="Fever, chest pain" required /></label>
+                    <button class="btn" type="submit">Add Patient</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Add Doctor</h3>
+                </div>
+                <form id="doctorForm" class="form-grid">
+                    <label class="field"><span>Doctor ID</span><input id="dId" placeholder="D501" required /></label>
+                    <label class="field"><span>Doctor Name</span><input id="dName" placeholder="Dr. Alice" required /></label>
+                    <label class="field span-2"><span>Specialization</span><input id="dSpec" placeholder="Cardiology" required /></label>
+                    <button class="btn" type="submit">Add Doctor</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Book Appointment</h3>
+                </div>
+                <form id="appointmentForm" class="form-grid">
+                    <label class="field"><span>Appointment ID</span><input id="aId" placeholder="A901" required /></label>
+                    <label class="field"><span>Patient ID</span><input id="aPatientId" placeholder="P1001" required /></label>
+                    <label class="field"><span>Doctor ID</span><input id="aDoctorId" placeholder="D501" required /></label>
+                    <label class="field"><span>Date</span><input id="aDate" type="date" required /></label>
+                    <label class="field"><span>Time</span><input id="aTime" type="time" required /></label>
+                    <button class="btn" type="submit">Book</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Emergency Triage</h3>
+                </div>
+                <div class="triage-grid">
+                    <form id="emergencyForm" class="inline-form">
+                        <input id="ePatientId" placeholder="Patient ID" required />
+                        <button class="btn" type="submit">Queue Emergency</button>
+                    </form>
+                    <button id="treatBtn" class="btn danger">Treat Next Emergency</button>
+                    <p id="treatedPatient" class="result"></p>
+                </div>
+            </section>
+
+            <section class="panel span-full">
+                <div class="panel-head">
+                    <h3>Patients</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Symptoms</th><th>Severity</th></tr></thead>
+                        <tbody id="patientsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel span-full">
+                <div class="panel-head">
+                    <h3>Doctors</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Name</th><th>Specialization</th></tr></thead>
+                        <tbody id="doctorsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel span-full">
+                <div class="panel-head">
+                    <h3>Appointments</h3>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th></tr></thead>
+                        <tbody id="appointmentsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-foot">Live data source: C++ backend API + data files in data/</footer>
+
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

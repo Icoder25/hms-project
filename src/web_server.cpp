@@ -1,17 +1,21 @@
+
+// HMS Web Server: Exposes REST API and serves frontend
 #include "hospital_system.h"
 
-#include <httplib.h>
-#include <nlohmann/json.hpp>
+#include <httplib.h> // REST API server (cpp-httplib)
+#include <nlohmann/json.hpp> // JSON serialization/deserialization
 
-#include <filesystem>
+#include <filesystem> // File and directory operations
 #include <iostream>
-#include <mutex>
+#include <mutex> // Thread safety for shared HMS instance
 #include <string>
 #include <vector>
 
-using json = nlohmann::json;
+using json = nlohmann::json; // Alias for convenience
 
+// Utility functions for JSON conversion and error handling
 namespace {
+// Convert Patient struct to JSON
 json patientToJson(const Patient& patient) {
     return json{
         {"id", patient.id},
@@ -22,6 +26,7 @@ json patientToJson(const Patient& patient) {
     };
 }
 
+// Convert Doctor struct to JSON
 json doctorToJson(const Doctor& doctor) {
     return json{
         {"id", doctor.id},
@@ -30,6 +35,7 @@ json doctorToJson(const Doctor& doctor) {
     };
 }
 
+// Convert Appointment struct to JSON
 json appointmentToJson(const Appointment& appointment) {
     return json{
         {"appointmentId", appointment.appointmentId},
@@ -40,15 +46,18 @@ json appointmentToJson(const Appointment& appointment) {
     };
 }
 
+// Set JSON response with status code
 void setJson(httplib::Response& response, const json& body, int status = 200) {
     response.status = status;
     response.set_content(body.dump(), "application/json");
 }
 
+// Set error response as JSON
 void setError(httplib::Response& response, int status, const std::string& message) {
     setJson(response, json{{"error", message}}, status);
 }
 
+// Parse JSON body from HTTP request
 bool parseJsonBody(const httplib::Request& request, httplib::Response& response, json& body) {
     try {
         body = json::parse(request.body);
@@ -60,28 +69,36 @@ bool parseJsonBody(const httplib::Request& request, httplib::Response& response,
 }
 }  // namespace
 
+// Main entry: launches REST API and serves frontend
+// Uses mutex for thread safety (multiple requests)
+// Delegates all data operations to HospitalManagementSystem (DAA: Hash Table, Priority Queue, Binary Search, etc.)
 int main() {
     namespace fs = std::filesystem;
     const std::string dataDirectory = "data";
     HospitalManagementSystem system;
     std::mutex dataMutex;
 
+    // Load persistent data (DAA: File I/O)
     if (!system.loadFromFiles(dataDirectory)) {
         std::cerr << "Warning: some records could not be loaded from data files.\n";
     }
 
+    // REST API server
     httplib::Server server;
 
+    // CORS headers for browser access
     server.set_default_headers({
         {"Access-Control-Allow-Origin", "*"},
         {"Access-Control-Allow-Headers", "Content-Type"},
         {"Access-Control-Allow-Methods", "GET, POST, OPTIONS"}
     });
 
+    // Handle CORS preflight requests
     server.Options(R"(/api/.*)", [](const httplib::Request&, httplib::Response& response) {
         response.status = 204;
     });
 
+    // Try to mount the frontend directory (serves static files)
     const std::vector<std::string> frontendCandidates = {
         "./frontend",
         "../frontend",
@@ -104,6 +121,7 @@ int main() {
         return 1;
     }
 
+    // Helper: persist data after mutating API calls
     auto persistOrError = [&](httplib::Response& response) -> bool {
         if (!system.saveToFiles(dataDirectory)) {
             setError(response, 500, "Failed to save data files.");
@@ -112,10 +130,12 @@ int main() {
         return true;
     };
 
+    // Health check endpoint
     server.Get("/api/health", [](const httplib::Request&, httplib::Response& response) {
         setJson(response, json{{"status", "ok"}});
     });
 
+    // System stats endpoint (DAA: Hash Table size, Priority Queue size)
     server.Get("/api/stats", [&](const httplib::Request&, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         setJson(response, json{
@@ -126,6 +146,7 @@ int main() {
         });
     });
 
+    // List all patients (DAA: Sorted Vector traversal)
     server.Get("/api/patients", [&](const httplib::Request&, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         const std::vector<Patient> patients = system.listPatientsSortedByName();
@@ -136,6 +157,7 @@ int main() {
         setJson(response, body);
     });
 
+    // Add patient (DAA: Hash Table for ID, Sorted Vector for name)
     server.Post("/api/patients", [&](const httplib::Request& request, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         json body;
@@ -162,6 +184,7 @@ int main() {
         setJson(response, patientToJson(patient), 201);
     });
 
+    // List all doctors (DAA: Hash Table traversal)
     server.Get("/api/doctors", [&](const httplib::Request&, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         const std::vector<Doctor> doctors = system.listDoctors();
@@ -172,6 +195,7 @@ int main() {
         setJson(response, body);
     });
 
+    // Add doctor (DAA: Hash Table)
     server.Post("/api/doctors", [&](const httplib::Request& request, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         json body;
@@ -196,6 +220,7 @@ int main() {
         setJson(response, doctorToJson(doctor), 201);
     });
 
+    // List all appointments (DAA: List, Sorting by date/time)
     server.Get("/api/appointments", [&](const httplib::Request&, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         const std::vector<Appointment> appointments = system.listAppointmentsSortedByDateTime();
@@ -206,6 +231,7 @@ int main() {
         setJson(response, body);
     });
 
+    // Book appointment (DAA: List, Hash Set for unique IDs)
     server.Post("/api/appointments", [&](const httplib::Request& request, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         json body;
@@ -232,6 +258,7 @@ int main() {
         setJson(response, appointmentToJson(appointment), 201);
     });
 
+    // Add emergency case (DAA: Priority Queue/Heap)
     server.Post("/api/emergency", [&](const httplib::Request& request, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         json body;
@@ -252,6 +279,7 @@ int main() {
         setJson(response, json{{"queuedPatientId", patientId}}, 201);
     });
 
+    // Treat next emergency (DAA: Priority Queue/Heap)
     server.Post("/api/emergency/next", [&](const httplib::Request&, httplib::Response& response) {
         std::lock_guard<std::mutex> lock(dataMutex);
         const std::optional<Patient> treated = system.treatNextEmergency();
@@ -267,6 +295,7 @@ int main() {
         setJson(response, patientToJson(treated.value()));
     });
 
+    // Startup message
     std::cout << "HMS web server running at http://localhost:8080\n";
     std::cout << "Serving frontend from " << mountedFrontendPath << " and API from /api/*\n";
 

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <limits>
 
+// DAA: Heap comparator for priority queue (emergency cases)
 bool HospitalManagementSystem::EmergencyComparator::operator()(const EmergencyCase& lhs, const EmergencyCase& rhs) const {
     if (lhs.severity == rhs.severity) {
         return lhs.ticket > rhs.ticket;
@@ -15,6 +16,8 @@ bool HospitalManagementSystem::EmergencyComparator::operator()(const EmergencyCa
     return lhs.severity < rhs.severity;
 }
 
+// DAA: Insert patient, maintain sorted name index for binary search
+// Uses hash table for ID lookup, sorted vector for name
 bool HospitalManagementSystem::addPatient(const Patient& patient) {
     if (patient.id.empty() || patient.name.empty() || patient.age <= 0) {
         return false;
@@ -45,6 +48,7 @@ bool HospitalManagementSystem::addPatient(const Patient& patient) {
     return true;
 }
 
+// DAA: Insert doctor using hash table for fast lookup
 bool HospitalManagementSystem::addDoctor(const Doctor& doctor) {
     if (doctor.id.empty() || doctor.name.empty() || doctor.specialization.empty()) {
         return false;
@@ -58,6 +62,7 @@ bool HospitalManagementSystem::addDoctor(const Doctor& doctor) {
     return true;
 }
 
+// DAA: Insert appointment into list, check uniqueness with hash set
 bool HospitalManagementSystem::bookAppointment(const Appointment& appointment) {
     if (appointment.appointmentId.empty() || appointment.patientId.empty() || appointment.doctorId.empty() ||
         appointment.date.empty() || appointment.time.empty()) {
@@ -77,6 +82,7 @@ bool HospitalManagementSystem::bookAppointment(const Appointment& appointment) {
     return true;
 }
 
+// DAA: File I/O, loads all data structures from files
 bool HospitalManagementSystem::loadFromFiles(const std::string& dataDirectory) {
     clearAllData();
 
@@ -181,6 +187,7 @@ bool HospitalManagementSystem::loadFromFiles(const std::string& dataDirectory) {
     return loadedSuccessfully;
 }
 
+// DAA: File I/O, saves all data structures to files
 bool HospitalManagementSystem::saveToFiles(const std::string& dataDirectory) const {
     namespace fs = std::filesystem;
     const fs::path basePath(dataDirectory);
@@ -254,6 +261,7 @@ bool HospitalManagementSystem::saveToFiles(const std::string& dataDirectory) con
     return true;
 }
 
+// DAA: Hash table lookup for patient by ID
 std::optional<Patient> HospitalManagementSystem::findPatientById(const std::string& patientId) const {
     const auto it = patientsById_.find(patientId);
     if (it == patientsById_.end()) {
@@ -262,6 +270,7 @@ std::optional<Patient> HospitalManagementSystem::findPatientById(const std::stri
     return it->second;
 }
 
+// DAA: Binary search on sorted vector for patient name
 std::optional<Patient> HospitalManagementSystem::findPatientByNameBinarySearch(const std::string& name) const {
     if (name.empty()) {
         return std::nullopt;
@@ -286,6 +295,7 @@ std::optional<Patient> HospitalManagementSystem::findPatientByNameBinarySearch(c
     return patientIt->second;
 }
 
+// DAA: Traverse sorted vector to return patients by name
 std::vector<Patient> HospitalManagementSystem::listPatientsSortedByName() const {
     std::vector<Patient> result;
     result.reserve(patientNameIndex_.size());
@@ -300,6 +310,7 @@ std::vector<Patient> HospitalManagementSystem::listPatientsSortedByName() const 
     return result;
 }
 
+// DAA: Traverse hash table to return all doctors
 std::vector<Doctor> HospitalManagementSystem::listDoctors() const {
     std::vector<Doctor> result;
     result.reserve(doctorsById_.size());
@@ -315,12 +326,14 @@ std::vector<Doctor> HospitalManagementSystem::listDoctors() const {
     return result;
 }
 
+// DAA: Sort appointments by date/time using custom comparator
 std::vector<Appointment> HospitalManagementSystem::listAppointmentsSortedByDateTime() const {
     std::vector<Appointment> sorted = appointments_;
     std::sort(sorted.begin(), sorted.end(), compareAppointmentDateTime);
     return sorted;
 }
 
+// DAA: Add emergency case to priority queue (heap)
 bool HospitalManagementSystem::addEmergencyCase(const std::string& patientId) {
     const auto it = patientsById_.find(patientId);
     if (it == patientsById_.end()) {
@@ -331,6 +344,7 @@ bool HospitalManagementSystem::addEmergencyCase(const std::string& patientId) {
     return true;
 }
 
+// DAA: Pop highest-priority emergency case from heap
 std::optional<Patient> HospitalManagementSystem::treatNextEmergency() {
     if (emergencyQueue_.empty()) {
         return std::nullopt;
@@ -347,30 +361,37 @@ std::optional<Patient> HospitalManagementSystem::treatNextEmergency() {
     return it->second;
 }
 
+// DAA: Hash table lookup for patient existence
 bool HospitalManagementSystem::patientExists(const std::string& patientId) const {
     return patientsById_.find(patientId) != patientsById_.end();
 }
 
+// DAA: Hash table lookup for doctor existence
 bool HospitalManagementSystem::doctorExists(const std::string& doctorId) const {
     return doctorsById_.find(doctorId) != doctorsById_.end();
 }
 
+// DAA: Return size of patient hash table
 std::size_t HospitalManagementSystem::patientCount() const {
     return patientsById_.size();
 }
 
+// DAA: Return size of doctor hash table
 std::size_t HospitalManagementSystem::doctorCount() const {
     return doctorsById_.size();
 }
 
+// DAA: Return size of appointment list
 std::size_t HospitalManagementSystem::appointmentCount() const {
     return appointments_.size();
 }
 
+// DAA: Return size of emergency priority queue
 std::size_t HospitalManagementSystem::pendingEmergencyCount() const {
     return emergencyQueue_.size();
 }
 
+// Utility: Clear all data structures
 void HospitalManagementSystem::clearAllData() {
     patientsById_.clear();
     doctorsById_.clear();
@@ -385,6 +406,7 @@ void HospitalManagementSystem::clearAllData() {
     emergencyTicketCounter_ = 0;
 }
 
+// Utility: Print system statistics
 void HospitalManagementSystem::printSystemStats() const {
     std::cout << "\n--- System Stats ---\n";
     std::cout << "Patients: " << patientsById_.size() << "\n";
@@ -393,6 +415,7 @@ void HospitalManagementSystem::printSystemStats() const {
     std::cout << "Pending emergency cases: " << emergencyQueue_.size() << "\n";
 }
 
+// Utility: Convert string to lowercase
 std::string HospitalManagementSystem::toLower(std::string text) {
     std::transform(text.begin(), text.end(), text.begin(), [](unsigned char ch) {
         return static_cast<char>(std::tolower(ch));
@@ -400,6 +423,7 @@ std::string HospitalManagementSystem::toLower(std::string text) {
     return text;
 }
 
+// Utility: Compare appointments by date/time for sorting
 bool HospitalManagementSystem::compareAppointmentDateTime(const Appointment& lhs, const Appointment& rhs) {
     if (lhs.date == rhs.date) {
         return lhs.time < rhs.time;

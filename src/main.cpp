@@ -29,6 +29,7 @@ int readInt(const std::string& prompt, int minValue, int maxValue) {
     }
 }
 
+// Print patient details (utility)
 void printPatient(const Patient& patient) {
     std::cout << "Patient ID: " << patient.id << "\n";
     std::cout << "Name: " << patient.name << "\n";
@@ -37,6 +38,7 @@ void printPatient(const Patient& patient) {
     std::cout << "Severity (1-10): " << patient.severity << "\n";
 }
 
+// Print appointment details (utility)
 void printAppointment(const Appointment& appointment) {
     std::cout << "Appointment ID: " << appointment.appointmentId << " | "
               << "Patient ID: " << appointment.patientId << " | "
@@ -53,6 +55,7 @@ void saveImmediately(HospitalManagementSystem& system, const std::string& dataDi
     }
 }
 
+// Add patient: uses hash table for ID, sorted vector for name (DAA: Hash Table, Binary Search)
 void addPatientFlow(HospitalManagementSystem& system, const std::string& dataDirectory) {
     Patient patient;
     patient.id = readLine("Enter patient ID: ");
@@ -69,6 +72,7 @@ void addPatientFlow(HospitalManagementSystem& system, const std::string& dataDir
     }
 }
 
+// Add doctor: uses hash table for fast lookup (DAA: Hash Table)
 void addDoctorFlow(HospitalManagementSystem& system, const std::string& dataDirectory) {
     Doctor doctor;
     doctor.id = readLine("Enter doctor ID: ");
@@ -83,6 +87,7 @@ void addDoctorFlow(HospitalManagementSystem& system, const std::string& dataDire
     }
 }
 
+// Book appointment: uses list for storage, hash set for unique IDs (DAA: List, Hash Set)
 void bookAppointmentFlow(HospitalManagementSystem& system, const std::string& dataDirectory) {
     Appointment appointment;
     appointment.appointmentId = readLine("Enter appointment ID: ");
@@ -99,6 +104,7 @@ void bookAppointmentFlow(HospitalManagementSystem& system, const std::string& da
     }
 }
 
+// Search patient by ID: uses hash table lookup (DAA: Hash Table)
 void searchPatientByIdFlow(const HospitalManagementSystem& system) {
     const std::string patientId = readLine("Enter patient ID to search: ");
     const std::optional<Patient> patient = system.findPatientById(patientId);
@@ -112,6 +118,7 @@ void searchPatientByIdFlow(const HospitalManagementSystem& system) {
     printPatient(patient.value());
 }
 
+// Search patient by name: uses binary search on sorted vector (DAA: Binary Search)
 void searchPatientByNameFlow(const HospitalManagementSystem& system) {
     const std::string name = readLine("Enter patient name to search (binary search): ");
     const std::optional<Patient> patient = system.findPatientByNameBinarySearch(name);
@@ -125,6 +132,7 @@ void searchPatientByNameFlow(const HospitalManagementSystem& system) {
     printPatient(patient.value());
 }
 
+// List patients: traverses sorted vector (DAA: Sorting, Traversal)
 void listPatientsFlow(const HospitalManagementSystem& system) {
     const std::vector<Patient> patients = system.listPatientsSortedByName();
     if (patients.empty()) {
@@ -139,6 +147,7 @@ void listPatientsFlow(const HospitalManagementSystem& system) {
     }
 }
 
+// List doctors: traverses hash table (DAA: Hash Table Traversal)
 void listDoctorsFlow(const HospitalManagementSystem& system) {
     const std::vector<Doctor> doctors = system.listDoctors();
     if (doctors.empty()) {
@@ -153,6 +162,7 @@ void listDoctorsFlow(const HospitalManagementSystem& system) {
     }
 }
 
+// List appointments: sorts by date/time (DAA: Sorting)
 void listAppointmentsFlow(const HospitalManagementSystem& system) {
     const std::vector<Appointment> appointments = system.listAppointmentsSortedByDateTime();
     if (appointments.empty()) {
@@ -166,6 +176,7 @@ void listAppointmentsFlow(const HospitalManagementSystem& system) {
     }
 }
 
+// Add emergency: uses priority queue (heap) for emergencies (DAA: Priority Queue/Heap)
 void addEmergencyFlow(HospitalManagementSystem& system, const std::string& dataDirectory) {
     const std::string patientId = readLine("Enter patient ID for emergency queue: ");
     if (system.addEmergencyCase(patientId)) {
@@ -176,6 +187,7 @@ void addEmergencyFlow(HospitalManagementSystem& system, const std::string& dataD
     }
 }
 
+// Treat emergency: pops from priority queue (heap) (DAA: Priority Queue/Heap)
 void treatEmergencyFlow(HospitalManagementSystem& system, const std::string& dataDirectory) {
     const std::optional<Patient> patient = system.treatNextEmergency();
     if (!patient.has_value()) {
@@ -188,6 +200,7 @@ void treatEmergencyFlow(HospitalManagementSystem& system, const std::string& dat
     saveImmediately(system, dataDirectory);
 }
 
+// Print menu (utility)
 void printMenu() {
     std::cout << "\n===== Hospital Management System =====\n";
     std::cout << "1. Add patient\n";
@@ -204,6 +217,7 @@ void printMenu() {
     std::cout << "0. Exit\n";
 }
 
+// Main function: CLI for HMS, each menu option uses a specific DAA approach
 int main() {
     HospitalManagementSystem system;
     const std::string dataDirectory = "data";

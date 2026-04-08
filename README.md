@@ -1,59 +1,160 @@
-# Hospital Management System (C++ + DAA Approach)
+# 🏥 Hospital Management System
 
-This project is a hospital management system built in C++ with a strong data-structures-and-algorithms (DAA) focus. It supports both a CLI flow and a web API + frontend flow on top of the same core logic and data files.
+A **high-performance Hospital Management System (HMS)** built in **C++17**, designed with a strong focus on **Data Structures and Algorithms (DAA)** and clean **Object-Oriented Programming (OOP)** principles.
+
+This system supports both:
+
+* 🖥️ **CLI-based interaction**
+* 🌐 **Web API + Frontend dashboard**
+
+All layers operate on the same **core logic and persistent data**, ensuring consistency and modularity.
 
 ![Hospital Management System Screenshot](image.png)
 
 
-## Features
+---
 
-- Add and search patients
-- Add doctors and manage specializations
-- Book appointments with ID validation
-- View appointments sorted by date and time
-- Manage emergency triage with severity priority
-- Persist data with automatic load/save
-- Access the same system from CLI or web frontend
+## 🚀 Key Features
 
-## DAA Approaches Used (What and Why)
+* 👤 Patient Management (Add, Search, View)
+* 👨‍⚕️ Doctor Management with specialization indexing
+* 📅 Appointment Booking with validation
+* ⏱️ Sorted appointment listing (date/time)
+* 🚑 Emergency Triage (priority-based)
+* 💾 Automatic file-based persistence
+* 🔗 Unified CLI + Web interface over same system
+* ⚡ Efficient performance using optimized DSA choices
 
-This project uses practical DAA choices to keep everyday hospital operations fast and predictable as records grow.
+---
 
-**Where and how DAA approaches are used:**
+## 🧠 System Design Philosophy
 
-- **Hash map (`unordered_map`)**
-	- Used in: `patientsById_` and `doctorsById_` in [src/hospital_system.h](src/hospital_system.h)
-	- Purpose: Fast patient/doctor lookup by ID (average O(1) insert/find)
-	- Example: See all patient/doctor add/search functions in [src/hospital_system.cpp](src/hospital_system.cpp)
+This project is designed around **real-world efficiency**:
 
-- **Hash set (`unordered_set`)**
-	- Used in: `appointmentIds_` in [src/hospital_system.h](src/hospital_system.h)
-	- Purpose: Ensures appointment IDs are unique before booking (average O(1) insert/find)
-	- Example: See appointment booking logic in [src/hospital_system.cpp](src/hospital_system.cpp)
+> “Operations should remain fast and predictable even as data grows.”
 
-- **Binary search (`lower_bound`)**
-	- Used in: `findPatientByNameBinarySearch` and patient name index insertion in [src/hospital_system.cpp](src/hospital_system.cpp)
-	- Purpose: Fast patient search by name using a sorted index (O(log n) search)
+Instead of using heavy databases or frameworks, this system leverages:
 
-- **Sorted index maintenance**
-	- Used in: `patientNameIndex_` (vector of pairs) in [src/hospital_system.h](src/hospital_system.h)
-	- Purpose: Keeps the name index always sorted for binary search (O(n) insertion)
+* **Optimized in-memory structures**
+* **File-based persistence**
+* **Algorithm-driven decision making**
 
-- **Sorting (`std::sort`)**
-	- Used in: Appointment and doctor listing functions in [src/hospital_system.cpp](src/hospital_system.cpp)
-	- Purpose: Ensures output is always sorted by date/time or ID (O(n log n))
+---
 
-- **Priority queue (heap)**
-	- Used in: `emergencyQueue_` in [src/hospital_system.h](src/hospital_system.h) and related logic in [src/hospital_system.cpp](src/hospital_system.cpp)
-	- Purpose: Emergency triage—always treat the highest-severity case first (O(log n) push/pop)
+## 🧩 Architecture Overview
 
-- **Greedy strategy**
-	- Used in: Emergency treatment policy (see `treatNextEmergency` in [src/hospital_system.cpp](src/hospital_system.cpp))
-	- Purpose: Always process the most critical case available, matching real-world triage
+```text
+                ┌─────────────────────┐
+                │     Frontend UI     │
+                │ (HTML + JS Client)  │
+                └─────────┬───────────┘
+                          │ REST API
+                ┌─────────▼───────────┐
+                │   Web API Layer     │
+                │   (C++ HTTP Server) │
+                └─────────┬───────────┘
+                          │
+                ┌─────────▼───────────┐
+                │  Core HMS Engine    │
+                │ (OOP + DSA Logic)   │
+                └─────────┬───────────┘
+                          │
+                ┌─────────▼───────────┐
+                │ File Persistence    │
+                │   (data/*.txt)      │
+                └─────────────────────┘
+```
 
-## Build and Run
+---
 
-### Windows (PowerShell + MSYS2/MinGW)
+## 🧠 DAA Approaches Used (What & Why)
+
+This project uses **practical and production-relevant DSA techniques** to optimize common hospital workflows.
+
+### 🔹 1. Hash Map (`unordered_map`)
+
+* **Used in:** `patientsById_`, `doctorsById_`
+* **Purpose:** O(1) average lookup for entities
+* **Why:** Fast retrieval is critical in healthcare systems
+
+---
+
+### 🔹 2. Hash Set (`unordered_set`)
+
+* **Used in:** `appointmentIds_`
+* **Purpose:** Enforces unique appointment IDs
+* **Why:** Prevents data inconsistency efficiently
+
+---
+
+### 🔹 3. Binary Search (`lower_bound`)
+
+* **Used in:** Patient name search
+* **Purpose:** O(log n) search performance
+* **Why:** Faster than linear scan for large datasets
+
+---
+
+### 🔹 4. Sorted Index Maintenance
+
+* **Used in:** `patientNameIndex_`
+* **Purpose:** Maintain sorted structure for binary search
+* **Complexity:** O(n) insert, O(log n) search
+
+---
+
+### 🔹 5. Sorting (`std::sort`)
+
+* **Used in:** Appointment and doctor listings
+* **Purpose:** Ordered output (time-based / ID-based)
+* **Complexity:** O(n log n)
+
+---
+
+### 🔹 6. Priority Queue (`std::priority_queue`)
+
+* **Used in:** `emergencyQueue_`
+* **Purpose:** Always treat highest severity first
+* **Complexity:** O(log n) insert/remove
+
+---
+
+### 🔹 7. Greedy Strategy (Emergency Handling)
+
+* **Used in:** Emergency triage system
+* **Purpose:** Always process the most critical case
+* **Why:** Mirrors real-world hospital triage logic
+
+---
+
+## 💾 File Handling (Persistence)
+
+The system ensures **data durability without a database**.
+
+### 📂 Storage Structure
+
+* `data/patients.txt`
+* `data/doctors.txt`
+* `data/appointments.txt`
+* `data/emergency_queue.txt`
+
+### ⚙️ Behavior
+
+* Loads all data at startup
+* Saves immediately after each mutation
+* Automatically creates `data/` folder if missing
+
+### 🛡️ Design Benefit
+
+* Lightweight
+* Easy to debug
+* No external dependencies
+
+---
+
+## 🖥️ Build & Run
+
+### 🟢 Windows (PowerShell + MinGW)
 
 ```powershell
 cmake -S . -B build-mingw -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++
@@ -61,31 +162,24 @@ cmake --build build-mingw
 .\build-mingw\hms.exe
 ```
 
-### Run Web Frontend (Connected to Current C++ Codebase)
+---
 
-Build and run the web server target:
+### 🌐 Run Web Server
 
 ```powershell
-cmake -S . -B build-mingw -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++
 cmake --build build-mingw --target hms_web
 .\build-mingw\hms_web.exe
 ```
 
-Then open:
+Open in browser:
 
-```text
+```
 http://localhost:8080
 ```
 
-If you open `frontend/index.html` using VS Code Live Preview (port 3000), the frontend will automatically call the API at `http://127.0.0.1:8080`.
+---
 
-Notes:
-
-- Web API endpoints are served at `/api/*`.
-- Frontend files are served from `frontend/`.
-- The web app uses the same `data/` files as the CLI app.
-
-### Linux/macOS
+### 🐧 Linux / macOS
 
 ```bash
 cmake -S . -B build
@@ -93,22 +187,83 @@ cmake --build build
 ./build/hms
 ```
 
-## Direct g++ Build (Optional)
+---
+
+### ⚡ Direct Compile (Optional)
 
 ```bash
 g++ -std=c++17 -O2 src/main.cpp src/hospital_system.cpp -o hms
 ./hms
 ```
 
-## File Handling (Data Persistence)
+---
 
-The application automatically loads data when it starts.
-The application also saves immediately after every successful data-changing action (add/book/treat), and saves again on exit.
+## 🌐 Frontend Integration
 
-- Data folder: `data/`
-- Patients file: `data/patients.txt`
-- Doctors file: `data/doctors.txt`
-- Appointments file: `data/appointments.txt`
-- Emergency queue file: `data/emergency_queue.txt`
+* Served from: `frontend/`
+* API Base URL: `http://127.0.0.1:8080/api`
+* Works with:
 
-If the `data/` folder does not exist, it is created automatically on first save.
+  * Local server
+  * VS Code Live Preview
+
+---
+
+## 📌 Why This Project Stands Out
+
+✔ Combines **OOP + DSA + System Design**
+✔ Uses **real-world triage logic**
+✔ Demonstrates **performance-aware design**
+✔ Supports both **CLI and Web interface**
+✔ Clean, modular, and extensible
+
+---
+
+## 📈 Future Improvements
+
+* Database integration (PostgreSQL / SQLite)
+* Real-time updates (WebSockets)
+* Authentication system
+* Advanced analytics dashboard
+* Graph-based ambulance routing (Dijkstra)
+
+---
+
+## 🎯 Resume Highlight
+
+> Developed a Hospital Management System in C++ using OOP and advanced DSA techniques (hash maps, priority queues, binary search) with both CLI and web interfaces, ensuring efficient patient management and emergency triage.
+
+---
+
+## ❓ FAQs
+
+### Q: Why not use a database?
+
+A: For this project scope, file-based persistence keeps the system simple, portable, and easy to debug while still demonstrating core logic.
+
+---
+
+### Q: Why use `priority_queue`?
+
+A: To ensure emergency cases are handled based on severity, matching real-world hospital triage.
+
+---
+
+### Q: How scalable is this system?
+
+A: The in-memory + file approach works well for small to medium datasets. For larger systems, it can be extended with databases and distributed services.
+
+---
+
+### Q: Why use DAA in HMS?
+
+A: Hospital systems require fast lookup, prioritization, and sorting — DSA ensures these operations remain efficient as data grows.
+
+---
+
+## 🧠 Final Note
+
+This project is designed to demonstrate **strong fundamentals in systems programming, algorithmic thinking, and practical software engineering**, making it suitable for both academic evaluation and technical interviews.
+
+---
+
